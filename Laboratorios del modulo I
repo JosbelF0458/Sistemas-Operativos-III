@@ -1,0 +1,55 @@
+Practica 2: Configuración de parametros de red.
+sudo su
+Ifconfig
+
+nmtui
+ip add
+
+Practica 3: Gestion de Usuario y grupos.
+sudo su
+sudo getent group
+sudo nano /etc/sudoers
+josbelf ALL=(ALL:suALL) ALL
+sudo getent group
+
+sudo groupadd guest
+sudo useradd josbelf
+sudo getent group
+sudo Adduser josbelf guest
+sudo groupdel guest
+sudo getent group
+
+Practica 4: Gestion de Permisos de archivos.
+cd ~/Desktop
+mkdir materia
+cd materia
+touch estudiante.txt
+sudo vi estudiante.txt
+
+------------------
+:wq
+
+cat estudiante.txt
+ls -l
+Chmod 700 estudiante.txt
+ls -l
+chmod 070 estudiante.txt
+ls -l
+chmod 777 estudiante.txt
+
+cd ~/Desktop
+mkdir materia2
+cd materia
+ls
+sudo su
+mkdir materia2
+cd ~/Desktop/materia2
+
+ls
+cp estudiante.txt ~/Desktop/materia2
+cd ~/Desktop/materia2
+ls
+
+cd ~/Desktop
+rm -r materia2
+rm -r materia
