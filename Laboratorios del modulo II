@@ -1,0 +1,75 @@
+Modulo II
+
+Practica 1:
+
+1. 
+sudo apt update: actualiza la lista de repositorios que tenemos disponible 
+
+sudo apt upgrade: para actualizar con las ultimas versiones que hay disponibles
+clear
+
+2.
+bashtop para ver si tenemos la herramienta
+
+3.
+sudo apt install bashtop 
+
+git clone https://github.com/aristocratos/bashtop.git
+
+cd bashtop/
+
+cd DEB
+
+sudo ./build
+
+Bashtop: Bashtop es un monitor de recursos basado en línea de comandos escrito en bash que muestra el uso y las estadísticas de los procesadores de la CPU, la RAM, los discos duros, las fuentes de red y otros procesos en ejecución.
+
+Generalmente, Bashtop proporciona una excelente manera de controlar los recursos de su sistema Linux. Sin embargo, es mucho más lento que top y htop y consume un poco de recursos. Sin embargo, es una herramienta bastante impresionante que proporciona información destacada sobre varias métricas del sistema. Pruébalo y cuéntanos cómo te fue.
+
+Memory: memoria siendo usada, que esta disponible la que esta en el cache
+processes-id: cada programa, proceso y los argumentos esta asignado on un Id, el usuario que los esta usando y la cantidad de cpu que esta utilizando la informacion de mi cpu
+
+4.
+ls
+
+cd bashtop 
+
+sudo apt purge bashtop para desinstalar el bashtop 
+
+bashtop: no deberia de funcionar
+
+cd ..
+rm -rf bashtop con esto eliminamos el directorio 
+ls para ver si ya no aparece bashtop
+
+5.
+sudo apt autoremove
+Y para decir que si
+
+clear
+
+Practica 2:
+
+1.
+crontab -e
+nano
+1
+Nos muestran instrucciones para realizar trabajos, gestionarlos y etc
+
+0 23 * * * sudo apt update && sudo apt upgrade -y para que asi actualize las listas de repositorios 
+
+
+2.
+0 3 * * * /sbin/shutdown -r now 
+
+Para guardar Crt + o, Enter, X
+
+crontab -l para ver lo que creamos
+clear
+
+
+3.
+instalamos el programa at: sudo apt install at Y
+
+Con la terminal Root
+at now +1 minute | rm -rf /tmp/*
