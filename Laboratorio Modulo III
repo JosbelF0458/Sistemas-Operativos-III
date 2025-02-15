@@ -1,0 +1,98 @@
+Laboratorio modulo III
+
+Practica 1:
+
+Sudo su
+Sudo nano /etc/default/grub
+
+modificar la linea: GRUB_TIMEOUT=20
+
+sudo update-grub
+
+sudo -i
+reboot -f
+
+e
+init=/bin/bash
+crt + x
+
+mount -o remount,rw /
+passwd root
+******
+******
+
+Montar el sistema en modo solo lectura nuevamente
+mount -o remount,ro /
+reboot
+
+sudo -i
+
+Practica 2:
+
+nano backup.sh
+
+#!/bin/bash
+
+# Definir variables
+USER_HOME="/home/$(whoami)"
+BACKUP_DIR="/home/$(whoami)/backups"
+TIMESTAMP=$(date "+%d-%m-%Y:%H:%M")
+BACKUP_FILE="$BACKUP_DIR/backup_$TIMESTAMP.tar.gz"
+
+# Crear directorio de backups si no existe
+mkdir -p "$BACKUP_DIR"
+
+# Crear backup con TAR
+tar -czvf "$BACKUP_FILE" "$USER_HOME"
+
+# Mostrar mensaje de éxito
+echo "Backup creado: $BACKUP_FILE"
+
+Chmod +x backup.sh
+
+./backup.sh
+
+
+
+2.
+
+nano copiar_ifconfig.sh
+
+#!/bin/bash
+
+# Preguntar por el nombre del archivo
+read -p "¿Cómo deseas nombrar el archivo? " nombre_archivo
+
+# Obtener el directorio del escritorio del usuario
+escritorio="$HOME/Escritorio"
+
+# Ejecutar ifconfig y guardar el resultado en el archivo especificado
+ifconfig > "$escritorio/$nombre_archivo.txt"
+
+# Confirmación
+echo "El archivo se ha guardado en: $escritorio/$nombre_archivo.txt"
+
+chmod +x copiar_ifconfig.sh
+
+./copiar_ifconfig.sh
+
+
+practica 3
+
+sudo systemctl enable ssh
+sudo systemctl start ssh
+systemctl status ssh
+Ifconfig
+
+ssh joosbelf@10.0.0.33
+mkdir .ssh1
+nano authorized_keys
+
+ssh-keygen  
+peg
+
+ls
+cat autorized_keys
+
+logout
+ssh josbelf@10.0.0.33
