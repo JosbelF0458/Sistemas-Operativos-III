@@ -1,0 +1,99 @@
+Practica 1: Instalar un servidor HTTP apache2/nginx
+
+Sudo apt-get install apache2
+systemctl status apache2 
+systemctl start apache2
+system status apache2
+
+cd /var/www/html
+ls
+sudo nano index.html
+crt K
+<html>
+<h1> Hola Mundo </h1>
+</html>
+
+cd /etc/apache2
+ls
+cd sites-available/
+ls
+sudo nano prc1.conf
+
+
+cd ..
+sudo nano ports.conf
+sudo nano /etc/hosts
+
+127.0.0.1 localhost: 127.0.0.1 prc1.local
+
+systemctl reload apache2
+sudo a2ensite prc1.conf
+systemctl reload apache2
+
+Navegador:prc1.local
+
+cd /var/www/html
+ls
+sudo nano index.html
+
+<html>
+<h1> Josbel Figuereo Rojas </h1>
+<h2> 20240458 </h2>
+<h3> Sistemas Operativos 3 </h3>
+</html>
+
+cd /etc/apache2
+ls
+sudo nano ports.conf
+Listen 8080
+cd sites-available/
+ls
+sudo nano prc2.conf
+
+<VirtualHost *:8080>
+    ServerName prcw.local
+    DocumentRoot /var/www/html/
+    <Directory /var/www/html/>
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+
+sudo nano /etc/hosts
+prc1.local: prc2.local
+
+systemctl reload apache2
+sudo a2ensite prc2.conf
+systemctl reload apache2
+
+Navegador: 127.0.0.1:8080
+
+Practica 3: Instalar un servidor de Impresion (1pts)
+
+sudo apt install cups
+sudo apt install cups-pdf
+systemctl start cups
+
+Navegador: localhost:631
+
+sudo ufw allow 631/tcp
+sudo /usr/sbin/cupsctl --remote-admin --remote-any --share-printers
+systemctl restart cups
+systemctl restart ufw
+
+(administration > add printer)
+whoami
+josbel
+0458
+cups-pdf
+check share this printer
+generic
+cups pdf no options
+add printer
+
+set printer options
+
+
+hostname -I
+"ip"
+10.0.0.33:631 desde pc host
