@@ -1,0 +1,153 @@
+Practica 2: Instalacion y configuracion del Cluster (2Pts)
+
+nodo 1 y 2
+sudo apt install -y keepalived
+sudo nano /etc/keepalived/keepalived.conf
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens33
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 12345
+    }
+    virtual_ipaddress {
+        10.0.0.100
+    }
+}
+
+
+sudo nano /etc/keepalived/keepalived.conf
+
+Cambia state MASTER por state BACKUP y reduce la prioridad:
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface ens33
+    virtual_router_id 51
+    priority 90 
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 12345
+    }
+    virtual_ipaddress {
+        10.0.0.100
+    }
+}
+
+sudo systemctl restart keepalived
+sudo systemctl enable keepalived
+
+ping 10.0.0.100
+
+cmd de pc ping 10.0.0.100 -t	
+
+
+nodo 1: sudo systemctl stop keepalived
+
+
+Practica 3: Cluster de Alta Disponibilidad HTTP (1Pts)
+
+nodo 1 
+
+sudo apt install apache2 keepalived -y
+
+sudo systemctl status apache2
+
+echo "este es el nodo numero 1" | sudo tee /var/www/html/index.html
+
+sudo nano /etc/keepalived/keepalived.conf
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens33
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 12345
+    }
+    virtual_ipaddress {
+        10.0.0.100
+    }
+    track_script {
+        chk_apache
+    }
+}
+
+
+vrrp_script chk_apache
+    script "pidof apache2"
+    interval 2
+}
+
+
+sudo systemctl start keepalived
+sudo systemctl enable keepalived
+sudo systemctl status keepalived
+
+
+internet: 10.0.0.100
+
+sudo systemctl stop keepalived
+
+internet: 10.0.0.100
+
+sudo systemctl start keepalived
+
+
+nodo 2
+
+sudo apt install apache2 keepalived -y
+
+sudo systemctl status apache2
+
+echo "este es el nodo numero 2" | sudo tee /var/www/html/index.html
+
+sudo nano /etc/keepalived/keepalived.conf
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface ens33
+    virtual_router_id 51
+    priority 90
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 12345
+    }
+    virtual_ipaddress {
+        10.0.0.100
+    }
+    track_script {
+        chk_apache
+    }
+}
+
+
+vrrp_script chk_apache
+    script "pidof apache2"
+    interval 2
+}
+
+
+sudo systemctl start keepalived
+sudo systemctl enable keepalived
+sudo systemctl status keepalived
+
+
+internet: 10.0.0.100
+
+sudo systemctl stop keepalived
+
+internet: 10.0.0.100
+
+sudo systemctl start keepalived
+
+
+
