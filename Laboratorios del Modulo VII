@@ -45,3 +45,73 @@ sudo touch /mnt/os3_copia/prueba.txt
 HOST
 
 ls /os3
+
+Practica 2: Creacion de fileserver compatible con Windows utilizando SAMBA (1Pts)
+
+sudo apt update
+sudo apt install samba
+
+sudo systemctl enable smbd
+sudo systemctl start smbd
+
+sudo mkdir /srv/compartida
+
+sudo groupadd sambagroup
+
+sudo useradd -m -G sambagroup adrian
+sudo smbpasswd -a adrian
+
+sudo chown -R adrian:sambagroup /srv/compartida
+sudo chmod -R 770 /srv/compartida
+
+sudo nano /etc/samba/smb.conf
+[compartida]
+path = /srv/compartida
+browseable = yes
+writable = yes
+valid users = @sambagroup
+create mask = 0770
+directory mask = 0770
+
+sudo systemctl restart smbd
+cd /srv/compartida
+for i in {1..100}; do touch adrian$i; done
+\\IP_DEL_SERVIDOR\compartida
+cd /srv/compartida
+cat adrian99
+
+Practica 3: Creacion de controlador de Dominio con cliente Windows (2Pts)
+
+sudo useradd -m lanegracubana
+sudo passwd lanegracubana
+
+sudo smbpasswd -a lanegracubana
+
+sudo apt update
+sudo apt install samba smbclient winbind libnss-winbind krb5-user
+
+sudo systemctl stop smbd nmbd winbind
+sudo systemctl disable smbd nmbd winbind
+
+sudo samba-tool domain provision --use-rfc2307 --interactive
+
+Sigue las instrucciones:
+
+Realm: SO3.inet
+
+Domain: SO3
+
+Server Role: dc
+
+DNS Backend: BIND9_DLZ
+
+Contraseña de administrador: (ingresa una segura).
+
+sudo mv /var/lib/samba/private/krb5.conf /etc/krb5.conf
+
+sudo systemctl start samba-ad-dc
+sudo systemctl enable samba-ad-dc
+
+
+
+
