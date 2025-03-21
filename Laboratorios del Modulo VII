@@ -1,0 +1,47 @@
+Practica 1: compartir archivos entre linux utilizando NFS (1pts)
+
+
+Sudo su
+Sudo apt update
+sudo apt install nfs-kernel-server
+
+HOST
+
+sudo mkdir /os3
+for i in {1..100}; do
+    sudo touch /os3/Adrian${i}.txt
+done
+
+ls /os3
+
+sudo chmod -R 777 /os3
+sudo chown nobody:nogroup /os3
+
+
+sudo nano /etc/exports
+/os3 *(rw,sync,no_subtree_check)
+
+sudo systemctl restart nfs-kernel-server
+
+CLIENTE
+
+sudo apt update
+sudo apt install nfs-common
+
+sudo mkdir /mnt/os3_copia
+sudo mount 10.0.0.24:/os3 /mnt/os3_copia 
+ls /mnt/os3_copia
+
+sudo nano /etc/stab
+10.0.0.24:/os3 /mnt/os3_copia nfs defaults 0 0 
+df -h
+
+df -h
+
+sudo reboot
+sudo su
+sudo touch /mnt/os3_copia/prueba.txt
+
+HOST
+
+ls /os3
