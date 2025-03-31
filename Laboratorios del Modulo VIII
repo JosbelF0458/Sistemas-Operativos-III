@@ -1,0 +1,131 @@
+-Practica 1: Instalacion y configuracion de Docker (1Pts)
+
+sudo apt update
+sudo apt install docker.io -y
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo systemctl status docker
+
+-Go Firefox 
+Search: docker Hub
+Buscar: nginx
+Primera opcion
+Copiar el texto
+
+-Back to Parrot Terminal
+sudo docker pull nginx
+
+cd /home
+sudo mkdir website
+cd website/
+
+sudo docker run -d -p 8888:80 -v /home/website:/usr/share/nginx/html nginx
+sudo docker ps -a 
+
+sudo nano index.html o sudo nano /home/website/index.html
+
+<html>
+  <body>
+    <h1>Josbel Figuereo</h1>
+    <p>Matricula: 20240458 </p>
+  </body>
+</html>
+
+sudo docker run -d -p 8888:80 -v /hombe/website:/usr/share/nginx/html nginx
+
+http://127.0.0.1:8888
+
+
+-Practica 2: Instalacion de Portainer (1Pts)
+
+-Go Firefox
+Search: docker hub
+Buscar: portainer
+Entrar a: portainer/portainer
+Copiar el Docker Pull Command: docker pull portainer/portainer
+
+sudo apt update
+sudo docker pull portainer/portainer
+
+sudo docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer
+
+sudo docker ps -a "Para verificar"
+
+http://127.0.0.1:9000/
+
+
+Get Started
+Click Dashboard
+Click Containers
+
+http://127.0.0.1:8888/
+
+Stop al 8888:80 container (practica anterior)
+sudo docker ps -a
+
+Start al 8888:80 container
+sudo docker ps -a
+
+
+
+Practica #3: IDespliegue de contenedor de Wordpress utilizando Docker-Compose (2pts)
+
+
+sudo apt install docker-compose 
+cd /home
+sudo nano docker-compose.yml 	
+
+
+version: '3.8'
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppass123
+    networks:
+      - wp_net
+
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    volumes:
+      - wp_data:/var/www/html
+    ports:
+      - "8080:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppass123
+      WORDPRESS_DB_NAME: wordpress
+    networks:
+      - wp_net
+
+volumes:
+  db_data:
+  wp_data:
+
+networks:
+  wp_net:
+    driver: bridge
+
+
+----------------------
+search:
+http://127.0.0.1:9000/
+
+sudo docker-compose up -d
+
+sudo docker-compose logs db | grep "MySQL init process done"
+
+sudo docker-compose exec wordpress bash -c "apt-get update && apt-get install -y default-mysql-client && mysql -h db -u wpuser -pwppass123 wordpress -e 'SHOW TABLES;'"
+
+Search in firefox the ip of the container: home_wordpress_1
+http://127.0.0.1:8080/
