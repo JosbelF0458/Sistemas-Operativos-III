@@ -1,0 +1,316 @@
+Para esta practica se necesitaran 3 maquinas virtuales:
+
+VM server (su Distro) Ansible Controller
+VM cliente Linux (en Digital Ocean para crear una cuenta nueva, puede utilizar el siguiente link de referido (200 Dolares por 60 dias gratis * requiere tarjeta de credito y se debe eliminar las VM una vez finalizado el projecto para evitar consumos futuros)) - Ansible Client01
+VM Windows 7 o 10: ansible Client 02
+
+
+Practica 1 Instalacion de Webmin (1Pts )
+
+sudo apt update
+
+sudo apt install perl libnet-ssleay-perl openssl libauthen-pam-perl libpam-runtime libio-pty-perl apt-show-versions python -y
+
+wget https://prdownloads.sourceforge.net/webadmin/webmin_2.303_all.deb
+
+sudo dpkg -i webmin_2.303_all.deb
+
+sudo apt --fix-broken install
+
+sudo systemctl start webmin
+sudo systemctl enable webmin
+sudo systemctl status webmin
+
+sudo passwd root
+
+https://localhost:10000
+
+
+--Crear y eliminar un usuario--
+
+System → Users and Groups → Create a new User
+
+Username: --adri--
+Directory: --automatic--
+Real name: --nombre--
+Password: --poner contraseña--
+Primary group: --añadir a un grupo--
+
+Create → adri → Delete → Delete user
+
+--Gestión de servicios--
+
+System → Bootup and shutdown → ssh.service
+
+sudo systemctl status ssh
+
+Stop Now
+
+sudo systemctl status ssh
+
+--Configuración de red--
+
+Networking → Network Configuration → Add a new interface
+
+Name: Adri
+Static conf: 10.0.0.40 255.255.255.0
+Create
+Delete
+
+--Gestión de archivos y directorios--
+
+Tools → File Manager → search file
+
+/var/www/html
+
+Right click index.html for delete or rename the file
+
+--Monitorización del sistema--
+
+System → Running Processes
+
+Memory, CPU, etc
+
+
+Practica 2 Desplieque de una VM con terraform en digital Ocean(1Pts)
+
+
+sudo apt update
+
+--Agregar la clave GPG de HashiCorp--
+sudo apt update && sudo apt install -y gnupg software-properties-common
+wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+--Agregar el repositorio oficial--
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+--Instalar Terraform--
+sudo apt update && sudo apt install -y terraform
+
+terraform --version #para verifivar
+
+
+
+Para generar la llave ssh:
+
+ssh-keygen
+sudo su
+cd .ssh
+ls
+cat id_rsa.pub
+--copiar llave y copiarla en el digital ocean--
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCdb/jku4zezFkDVjX4In8+uqyh4gCIMpO4oNojB9Xga/qJAkfW7RGi8Qr0l9+qiOEcrGDLueEzWqZGwZfMGvWs4p1k6Dtq6BJ6kQOXepa33xqEigArlqI4s5RIIl3U+GdhL5U0hxk2w7cZ0VqFV26KtqwzIN69K3omX21rWEgOZ8Lkq55MHhIlXPovEn18bQACtR8+/dQ/V0n1Rqlit9j8UqJtStonLM34QiCrCWk3vgAPIhj0xZT1GPiIkwiL2hY0LXkJSIxch37iIsYBoF7W8kJHFGBbAo1r1yvh5/ps2Jy+kF9R3M2LdBzz9wrdL/bXG9gdmTwq87beTTwykLjdY8yDTGpwlvAXOYScOdbfFV0XScX1lFC0WVPZQell6uk25GWVDkyDLi6BktP7mUTkZW0QliAt5mYNIYfG7xjTYv6CfAVyMaZ6ngQ1NuzrNNF7RIjtlngYqIuAnlfDV46w/AIa54Z34JmVpewA5all7KXWNTX7FfdcEdf2M04qkzM= josbelf@parrot
+exit
+
+mkdir terraform
+cd terraform/
+sudo vi adrian.tf
+
+-----------------------------------------------
+Generar tocken API y Fingerprint SSH para este paso desde el digital ocean
+
+terraform {
+  required_providers {
+    digitalocean = {
+      source  = "digitalocean/digitalocean"
+      version = "~> 2.0"
+    }
+  }
+}
+
+provider "digitalocean" { 
+token = "dop_v1_bcc7cd4f21abbb09ba6c12bd1dbd05e2aa82e8d3ccb2352d9480ed5c514a1f57"
+} 
+# practice 
+resource "digitalocean_droplet" "OS3VM" { 
+image = "ubuntu-22-04-x64" 
+name = "OS3VM" 
+region = "nyc1" 
+size = "s-1vcpu-1gb" 
+ssh_keys = ["25:68:1d:ed:29:c1:2a:e1:9f:6f:47:ff:c7:de:2c:d6"] 
+}
+
+-----------------------------------------------
+
+ESC → :wq
+
+cd ..
+cd terraform/
+terraform init
+terraform validate
+terraform apply
+yes
+
+Tocken: dop_v1_bcc7cd4f21abbb09ba6c12bd1dbd05e2aa82e8d3ccb2352d9480ed5c514a1f57
+
+FingerPrint: 25:68:1d:ed:29:c1:2a:e1:9f:6f:47:ff:c7:de:2c:d6
+
+
+Practica 3: Instalación de Ansible (1pts)
+
+
+sudo apt install ansible
+cd
+cd /etc
+sudo mkdir ansible
+cd ansible/
+sudo nano ansible.cfg
+
+---------------------------------------
+
+[defaults]
+inventory = /etc/ansible/hosts
+private_key_file = /home/josbelf/.ssh/id_rsa
+host_key_checking = False
+ask_become_pass = True
+
+[ssh_connection]
+ssh_args = -o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s
+
+---------------------------------------
+
+sudo nano hosts
+
+[win]
+10.0.0.37
+[win:vars]
+ansible_user=ansible
+ansible_password-20240458
+ansible_port=5985
+ansible_connection=winrm
+ansible_winrm_transport=basic
+ansible_winrm_server_cert_validation=ignore
+
+[linux]
+157.230.233.104
+[linux:vars]
+ansible_user=ansible
+ansible_ssh_private_key_file= ~/.ssh/id_rsa
+ansible_become_password=20240458
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+
+
+--Digital Ocean Client--
+adduser ansible
+usermod -aG sudo ansible
+chsh -s /bin/bash ansible
+
+su ansible
+cd
+ls -la
+mkdir .ssh
+cd .ssh
+sudo nano authorized_keys
+
+
+pegar:
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCdb/jku4zezFkDVjX4In8+uqyh4gCIMpO4oNojB9Xga/qJAkfW7RGi8Qr0l9+qiOEcrGDLueEzWqZGwZfMGvWs4p1k6Dtq6BJ6kQOXepa33xqEigArlqI4s5RIIl3U+GdhL5U0hxk2w7cZ0VqFV26KtqwzIN69K3omX21rWEgOZ8Lkq55MHhIlXPovEn18bQACtR8+/dQ/V0n1Rqlit9j8UqJtStonLM34QiCrCWk3vgAPIhj0xZT1GPiIkwiL2hY0LXkJSIxch37iIsYBoF7W8kJHFGBbAo1r1yvh5/ps2Jy+kF9R3M2LdBzz9wrdL/bXG9gdmTwq87beTTwykLjdY8yDTGpwlvAXOYScOdbfFV0XScX1lFC0WVPZQell6uk25GWVDkyDLi6BktP7mUTkZW0QliAt5mYNIYfG7xjTYv6CfAVyMaZ6ngQ1NuzrNNF7RIjtlngYqIuAnlfDV46w/AIa54Z34JmVpewA5all7KXWNTX7FfdcEdf2M04qkzM= josbelf@parrot
+
+--Desde el Linux server--
+
+ssh ansible@157.230.233.104
+exit
+
+ansible linux -m ping -u ansible
+
+--Desde el Windows host
+
+buscar: firewall → Advanced Settings → Inbound Rules → Habilitar: Compartir archivos e impresoras solicitud eco ipv4
+
+buscar: Estado de la red → Propiedades → Privado
+
+--Powershell de windows como administrador--
+
+--------------------------------------------------------
+
+Set-ExecutionPolicy RemoteSigned -Force
+Enable-PSRemoting -Force
+Set-Item WSMan:\localhost\Service\Auth\Basic -Value $true
+Set-Item WSMan:\localhost\Service\AllowUnencrypted -Value $true
+Restart-Service WinRM
+Get-NetFirewallRule -Name "WinRM HTTP" -ErrorAction SilentlyContinue | Remove-NetFirewallRule
+New-NetFirewallRule -Name "WinRM HTTP" -DisplayName "WinRM HTTP" -Protocol TCP -LocalPort 5985 -Action Allow
+if (Get-LocalUser -Name "ansible" -ErrorAction SilentlyContinue) {
+    Set-LocalUser -Name "ansible" -Password (ConvertTo-SecureString "20240458" -AsPlainText -Force)
+} else {
+    New-LocalUser -Name "ansible" -Password (ConvertTo-SecureString "20240458" -AsPlainText -Force) -FullName "Ansible User"
+}
+Add-LocalGroupMember -Group "Administrators" -Member "ansible"
+winrm delete winrm/config/Listener?Address=*+Transport=HTTP -ErrorAction SilentlyContinue
+winrm create winrm/config/Listener?Address=*+Transport=HTTP
+
+S (Si)
+
+DisplayName: ansible-wrm
+
+winrm get winrm/config/Service
+
+--Desde el Linux Server--
+sudo ping -c 4 10.0.0.37
+ansible win -m win_ping
+
+Practica 4: Comandos Ad-Hoc (1Pts)
+
+--Desde el Linux Server--
+
+ansible win -m win_shell -a "dir C:\\Users\\ansible\\Desktop"
+
+ansible win -m win_copy -a "src=C:\\Users\\ansible\\Desktop\\pruebaad.txt dest=C:\\Users\\ansible\\Documents remote_src=yes" -k --ask-pass
+
+ansible win -m win_shell -a "dir C:\\Users\\ansible\\Documents\\pruebaad.txt"
+
+-----------------------
+Reboot
+
+ansible linux -m reboot --become --become-user=root
+
+ssh root@157.230.233.104
+
+
+
+Practica 5: Playbooks (1Pts)
+
+sudo nano install_notepad.yml
+-------------------------------------------------------------------
+---
+- name: Instalar Notepad++ en Ansible2
+  hosts: win
+  tasks:
+    - name: Descargar el instalador de Notepad++
+      win_get_url:
+        url: https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.5/npp.8.5.Installer.x64.exe
+        dest: C:\Users\ansible\Downloads\npp_installer.exe
+
+
+    - name: Instalar Notepad++
+      win_package:
+        path: C:\Users\ansible\Downloads\npp_installer.exe
+        arguments: '/S'
+-------------------------------------------------------------------
+
+ansible-playbook install_notepad.yml
+
+----------------------------
+sudo nano update_repos.yml
+
+- name: Actualizar repositorios en Ansible1 (Linux)
+  hosts: linux
+  become: true
+  tasks:
+    - name: Actualizar repositorios (YUM en sistemas RHEL/CentOS)
+      yum:
+        name: '*'
+        state: latest
+      when: ansible_os_family == "RedHat"
+
+    - name: Actualizar repositorios (APT en Sistemas Debian/Ubuntu)
+      apt:
+        update_cache: yes
+        upgrade: dist
+      when: ansible_os_family == "Debian"
+
+-------------------------------------------------------------------
+
+ansible-playbook update_repos.yml
