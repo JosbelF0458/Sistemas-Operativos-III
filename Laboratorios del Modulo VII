@@ -46,39 +46,40 @@ HOST
 
 ls /os3
 
-Practica 2: Creacion de fileserver compatible con Windows utilizando SAMBA (1Pts)
+Practica 2: Creacion de fileserver compatible con Windows utilizando SAMBA
 
-sudo apt update
-sudo apt install samba
+sudo apt install samba -y
+mkdir compartida
+sudo nano /etc/samba/smb.conf 			Entramos a la configuración de samba y pegamos esto en la ultima linea
 
-sudo systemctl enable smbd
-sudo systemctl start smbd
-
-sudo mkdir /srv/compartida
-
-sudo groupadd sambagroup
-
-sudo useradd -m -G sambagroup adrian
-sudo smbpasswd -a adrian
-
-sudo chown -R adrian:sambagroup /srv/compartida
-sudo chmod -R 770 /srv/compartida
-
-sudo nano /etc/samba/smb.conf
 [compartida]
-path = /srv/compartida
-browseable = yes
+comment = directorio compartido de S3
+path = /home/josbelf/Desktop/compartida
+guest ok = no
 writable = yes
-valid users = @sambagroup
-create mask = 0770
-directory mask = 0770
+write list = josbelf
+browseable = yes
+create mask = 0755
+directory mask = 0755
 
-sudo systemctl restart smbd
-cd /srv/compartida
-for i in {1..100}; do touch adrian$i; done
-\\IP_DEL_SERVIDOR\compartida
-cd /srv/compartida
-cat adrian99
+sudo smbpasswd -a josbelf
+
+sudo systemctl restart smbd nmbd
+sudo ufw allow samba
+ls
+cd compartida/
+touch Adrian{1..100}.txt
+ls
+
+En nuestra pc
+Win + R
+\\10.0.0.36
+
+entrar a la carpeta compartida → Adrian1 → escribir algo
+
+Maquina Linux
+cat Adrian1.txt
+
 
 Practica 3: Creacion de controlador de Dominio con cliente Windows (2Pts)
 
