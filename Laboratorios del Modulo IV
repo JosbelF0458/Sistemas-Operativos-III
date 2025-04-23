@@ -70,6 +70,23 @@ Navegador: 127.0.0.1:8080
 
 Practica 3: Instalar un servidor de Impresion (1pts)
 
+correo:
+
+sudo apt update
+sudo apt install mailutils -y
+
+echo "Cuerpo del mensaje" | mail -s "Asunto del correo" destinatario@example.com
+
+sudo apt install sendmail -y
+
+(
+  echo "Subject: Asunto del correo"
+  echo "To: destinatario@example.com"
+  echo "From: tu_correo@example.com"
+  echo ""
+  echo "Cuerpo del mensaje"
+) | sendmail -t
+
 sudo apt install cups
 sudo apt install cups-pdf
 systemctl start cups
