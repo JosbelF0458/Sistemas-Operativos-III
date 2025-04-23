@@ -28,113 +28,97 @@ sudo gpg -d file.gpg
 Practica 2 - IP tables - UFW/Firewall-cmd 1pts
 
 
-nodo 1: 10.0.0.33
-nodo 2: 10.0.0.34
+sudo apt install apache2 vsftpd openssh-server
+sudo systemctl enable apache2
+sudo systemctl start apache2
+sudo systemctl enable vsftpd
+sudo systemctl start vsftpd
+sudo systemctl enable ssh
+sudo systemctl start ssh
 
-sudo apt install apache2 openssh-server -y
+visualizar las iptables:
+sudo iptables -L -n -v
+eliminar: sudo iptables -F
 
-nodo 1
-
-ip addr
-
-nodo 1
-
-ssh josbelf@10.0.0.42
-exit
-
-nodo 2 
-
-ssh josbelf@10.0.0.41
-exit
-
-nodo 1
-
-sudo iptables -L --line-numbers
-sudo iptables -A INPUT -p tcp --dport 22 -j DROP
-sudo iptables -A INPUT -p tcp --dport 21 -j DROP
+bloquear puertos:
 sudo iptables -A INPUT -p tcp --dport 80 -j DROP
+sudo iptables -A INPUT -p tcp --dport 21 -j DROP
+sudo iptables -A INPUT -p tcp --dport 22 -j DROP
 
-ssh josbelf@10.0.0.42
-exit
 
-nodo 2
+Habilitar nuevamente
+sudo iptables -D INPUT -p tcp --dport 80 -j DROP
+sudo iptables -D INPUT -p tcp --dport 21 -j DROP
+sudo iptables -D INPUT -p tcp --dport 22 -j DROP
 
-ssh josbelf@10.0.0.41
-exit
+sudo iptables -L -n -v
 
-nodo 1
-
-sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-sudo iptables -A INPUT -p tcp --dport 21 -j ACCEPT
-sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-sudo iptables -L --line-numbers
-sudo iptables -D INPUT 1
-sudo iptables -D INPUT 2
-sudo iptables -D INPUT 3
-sudo iptables -L --line-numbers
-
-1    ACCEPT	tcp -- anywhere		tcp dpt:http
-2    ACCEPT	tcp -- anywhere 	tcp dpt:ssh
-3    ACCEPT	tcp -- anywhere 	tcp dpt:ftp
-
-nodo 2
-
-ssh josbelf@10.0.0.41
-exit
-
-nodo 1
-
+sudo ufw enable
 sudo ufw deny 80/tcp
-sudo ufw deny 22/tcp
 sudo ufw deny 21/tcp
+sudo ufw deny 22/tcp
 
-sudo systemctl status ufw
-sudo ufw reload
-
-nodo 2
-
-ssh josbelf@10.0.0.33
-exit
-
-nodo 1
+sudo ufw status
 
 sudo ufw allow 80/tcp
-sudo ufw allow 22/tcp
 sudo ufw allow 21/tcp
+sudo ufw allow 22/tcp
 
-nodo 2
-
-ssh josbelf@10.0.0.33
-
-
-Practica 3 -Instalacion de IDS snort 1pts
-
+Practica 3 -Instalacion de IDS snort
 
 sudo nano /etc/apt/sources.list
 
+---------------------------------------------------------------------------------------------
 deb https://deb.parrot.sh/parrot lory main contrib non-free
-deb-sic https://deb.parrot.sh/parrot lory main contrib non-free
+deb-src https://deb.parrot.sh/parrot lory main contrib non-free
+
 
 deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse
-#deb-sic http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse
+#deb-src http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse
+
 
 #deb http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse
 #deb-src http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse
 
+
 #deb http://archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse
 #deb-src http://archive.ubuntu.com/ubuntu/ focal-security main restricted universe multiverse
+---------------------------------------------------------------------------------------------
 
-Llaves
-
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 384FEGACC0821F32
-sudo apt-key adv --kevserver hkp://keyserver.ubuntu.com:80 -recv-keys 87192801991BC93C
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3B4FE6ACC0B21F32
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 871920D1991BC93C
 
 
-sudo apt update && sudo apt upgrade -y 
-sudo apt install -y snort
-ens33 10.0.0.43
-snort -V
+sudo apt update
+poner la interfaz de red y interfaz
 
-sudo nano /etc/snort/snort.conf 		HOME_NET any
-sudo nano /etc/snort/rules/local.rules
+sudo touch /etc/snort/rules/sistemas.rules
+sudo nano /etc/snort/rules/sistemas.rules
+
+
+alert icmp any any -> $HOME_NET any (msg: "ICMP Traffic Detected"; sid: 1000001;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 21 (msg: "Traffic to Port 21 Detected"; sid: 1000002;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 22 (msg: "Traffic to Port 22 Detected"; sid: 1000003;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 80 (msg: "Traffic to Port 80 Detected"; sid: 1000004;)
+----------------------------------------------------------------------------------------------
+
+sudo nano /etc/snort/snort.conf			Para habilitar las reglas
+
+donde dice ipvar HOME_NET any, ponen: ipvar HOME_NET (su ip)
+ipvar HOME_NET 10.0.0.36
+
+bajar donde dice:
+include $RULE_PATH/community-web-php.rules
+y abajo ponen la que hicimos:
+include $RULE_PATH/sistemas.rules
+----------------------------------
+
+sudo systemctl restart snort.service
+sudo snort -k none -d -l/var/log/snort/ -b -c /etc/snort/snort.conf
+
+hacer ping desde cmd a 10.0.0.36
+oh buscar en google la ip 10.0.0.36
+
+abrir otra terminal
+sudo cat /var/log/snort/alert 			Para buscar la ip de nuestra maquina host (pc)
 
